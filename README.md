@@ -2,6 +2,8 @@
 
 This integration uses the API of the new [Eetlijst](https://eetlijst.nl/)  website, so you can check the eating status of you and your roommate from your home assistant instance.
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+
 ### Installation
 
 You can add this as a custom repository via HACS:
@@ -85,3 +87,4 @@ This is my first custom integration, so if you encounter any issues or bugs, ple
 - Handle cases for the new option where a person is only doing the groceries (Correct statuses, custom image etc.)
 - Handle changes in lijst users (like when a roommate changes).
 - Figure out how to translate the states using localisation files. Somehow these would only work for the config.
+- Get it added as a default repository
