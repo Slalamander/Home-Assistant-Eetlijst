@@ -24,8 +24,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     new_devices.append(infosensor)
     new_devices.append(EetlijstVandaag(lijst))
     new_devices.append(ShoppingList(lijst))
-    for person_order in lijst._residents_ordered:
-        residentSensor = EetlijstResident(eetlijst=lijst, person_order=person_order)
+    for idx, person_id in enumerate(lijst._residents_ordered):
+        residentSensor = EetlijstResident(eetlijst=lijst, person_id=person_id, sensor_idx=idx)
         new_devices.append(residentSensor)
 
     if new_devices:
@@ -265,17 +265,17 @@ class ShoppingList(SensorBase):
 class EetlijstResident(SensorBase):
     """Eetlijst Resident Sensor."""
 
-    def __init__(self, eetlijst, person_order):
+    def __init__(self, eetlijst, person_id, sensor_idx):
         super().__init__(eetlijst)
 
         # unique id: use order?
         # As per the sensor, this must be a unique value within this domain. This is done
         # by using the device ID, and appending "_battery"
-        self._attr_unique_id = f"{self._eetlijst._id}_{person_order}"
-        self._person_order = person_order
-        self._attr_name = f"Eetlijst {self._eetlijst.lijst_name} {person_order}"
-        self._person_name = self._eetlijst._residents_ordered[person_order]["name"]
-        self._person_id = self._eetlijst._residents_ordered[person_order]["id"]
+        self._attr_unique_id = f"{self._eetlijst._id}_{sensor_idx}"
+        #self._person_order = person_order
+        self._attr_name = f"Eetlijst {self._eetlijst.lijst_name} {sensor_idx}"
+        self._person_name = self._eetlijst._residents_ordered[person_id]
+        self._person_id = person_id #self._eetlijst._residents_ordered[person_order]["id"]
         self._attr_unit_of_measurement = self._person_name
         self._attr_device_class = "eetlijst_user"
         self._attr_translation_key = "eetlijst_user"
@@ -317,10 +317,10 @@ class EetlijstResident(SensorBase):
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        person_future = self.coordinator.data["future"][self._person_order]
+        person_future = self.coordinator.data["future"][self._person_id]
         self._attr_unit_of_measurement = self._person_name
         attr_dict = {}
-
+        #print(f"Updating Person {self._person_name}")
         if self._eetlijst._config_options["show_balance"]:
             for entry in self.coordinator.data["info"]["eetschema_group"][0]["summary"]:
                 if entry["user_id"] == self._person_id:
@@ -328,11 +328,12 @@ class EetlijstResident(SensorBase):
                     #self._attr_extra_state_attributes["Balance"] = f"€{balance:.2f}"
                     attr_dict["Balance"] = f"€{balance:.2f}"
 
+        attr_dict["eetstatus_num"] = None
         for day in person_future["next_week"]:
             #if day == "Today": continue
 
             day_state = person_future["next_week"][day]
-            day_text = day_state["status"]
+            day_text = None if day_state["status"] == "dont_know_yet" else day_state["status"]
 
             if day_state["status"] == "cook" or day_state["status"] == "eat_only":
                 if day == "Today":
@@ -341,16 +342,17 @@ class EetlijstResident(SensorBase):
                 if isinstance(day_state["number_guests"], int):
                     if day_state["number_guests"] > 0:
                         day_eaters = day_state["number_guests"]
-                        day_text = f"{day_text} + {day_eaters}"
                         if day == "Today":
                             attr_dict["eetstatus_num"] = 1 + day_eaters if day_state["status"] == "cook" else -1 - day_eaters
                             self._attr_unit_of_measurement = f'{self._person_name} + {day_state["number_guests"]}'
+                        else:
+                            day_text = f"{day_text} + {day_eaters}"
 
             if day == "Today":
                 self._attr_state = day_text
                 if day_state["status"] == "not_attending":
                     attr_dict["eetstatus_num"] = 0
-                elif day_state["status"] is None:
+                elif day_state["status"] is None or day_state["status"] is "dont_know_yet":
                     attr_dict["eetstatus_num"] = None
             else:
                 attr_dict[day] = day_text

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 22.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Laag_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#CECECE;}
+	.st1{display:none;}
+	.st2{display:none;fill:#FFFFFF;}
+	.st3{display:inline;fill:#FFFFFF;}
+	.st4{display:inline;opacity:0.4;fill:#CECECE;}
+	.st5{display:inline;}
+	.st6{opacity:0.4;fill:#CECECE;}
+	.st7{display:none;opacity:0.4;fill:#CECECE;}
+	.st8{font-family:'ADAM.CGPRO';}
+	.st9{font-size:11.0067px;}
+</style>
+<path class="st0" d="M19,19c0,1.1-0.9,2-2,2H7c-1.1,0-2-0.9-2-2v-7H3v-2h18v2h-2"/>
+<path class="st0" d="M8,1.5C6.2,1.5,4.7,3,4.7,4.8S6.2,8.2,8,8.2h1.5c0.4,0,0.8,0.1,1.1,0.3h2c-0.6-1.1-1.8-1.8-3.1-1.8H8
+	c-1,0-1.8-1-1.8-2S7,3,8,3 M12.9,2c0,1-0.9,1.8-1.9,1.8v1.5c1.9,0,3.5,1.3,3.9,3.2h1.5c-0.3-1.8-1.5-3.3-3.1-4.1
+	c0.6-0.6,1-1.5,1-2.4H12.9z"/>
+<path class="st1" d="M21.4,20.8L2.4,1.7L1.1,3l19.1,19L21.4,20.8 M11,8L9.4,6.3C9.8,5,10.6,3.8,12,3c1-0.6,2.1-1,3.2-1
+	c1.2,0,2.3,0.3,3.3,1c3.4,2.2,3.7,6.8,1.1,9.4c-0.8,0.8-1.6,1.3-2.6,1.5l-1.6-1.6c0.1,0,0.2-0.1,0.4-0.1c1-0.1,1.8-0.5,2.5-1.2
+	c0.9-0.9,1.4-2.1,1.2-3.4c-0.1-1.3-0.8-2.3-1.9-3.1c-0.7-0.4-1.4-0.6-2.2-0.6c-0.8,0-1.5,0.2-2.2,0.7c-1.2,0.7-1.8,1.8-1.9,3.1V8"/>
+<path class="st2" d="M14.9,8.5h1.5c-0.3-1.8-1.5-3.3-3.1-4.1c0.6-0.6,1-1.5,1-2.4h-1.5c0,1-0.8,1.8-1.8,1.8v1.5
+	C12.9,5.3,14.5,6.7,14.9,8.5z"/>
+<g class="st1">
+	<polygon class="st3" points="19,15.9 19,12 21,12 21,10 13.1,10 	"/>
+	<path class="st4" d="M11.7,8.5h1c-0.5-0.9-1.5-1.6-2.7-1.7L11.7,8.5z"/>
+	<path class="st3" d="M19,18.4L10.6,10l0,0L8.8,8.2l0,0l-2-2L6.5,5.9v0L4.7,4.1l0,0L4.2,3.5L2.9,4.8L8.2,10H3v2h2v7c0,1.1,0.9,2,2,2
+		h10c0.6,0,1.2-0.3,1.5-0.7l1.4,1.4l1.2-1.2L19,18.4L19,18.4z"/>
+	<path class="st4" d="M6.7,3.5C7,3.2,7.5,3,8,3V1.5c-0.9,0-1.7,0.4-2.3,1L6.7,3.5z"/>
+	<g class="st5">
+		<path class="st6" d="M13.3,4.4c0.6-0.6,1-1.5,1-2.4h-1.5c0,1-0.8,1.8-1.8,1.8v1.5c1.9,0,3.5,1.4,3.9,3.2h1.5
+			C16.1,6.7,15,5.2,13.3,4.4z"/>
+	</g>
+</g>
+<text transform="matrix(1 0 0 1 15.2012 8.0256)" class="st7 st8 st9">+</text>
+</svg>

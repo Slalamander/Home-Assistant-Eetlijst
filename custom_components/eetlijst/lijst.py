@@ -10,13 +10,13 @@ import aiohttp
 from datetime import datetime, timedelta
 import logging
 from homeassistant.core import HomeAssistant
-from .const import DOMAIN
+from .const import DOMAIN, REFRESH
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
 )
 
 APIURL = "https://api.samenn.nl/v1/graphql"
-SCAN_INTERVAL = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(seconds=REFRESH)
 
 LOGGER: logging.Logger = logging.getLogger(__package__)
 _LOGGER = logging.getLogger(__name__)
@@ -155,13 +155,18 @@ class LijstCoordinator(DataUpdateCoordinator):
                 for user in eetlijst_info["users_in_groups"]:
                     person = user["user"]["name"]
                     residents.append(person)
-
-                    residents_order[user["order"]] = {
-                        "name": person,
-                        "id": user["user"]["id"],
-                    }
+                    # person_num = user["order"]
+                    # if person_num in residents_order:
+                    #     while person_num in residents_order:
+                    #         person_num += 1
+                    # residents_order[person_num] = {
+                    #     "name": person,
+                    #     "id": user["user"]["id"],
+                    # }
+                    residents_order[user["user"]["id"]] = person
 
                 self.residents = residents
+                print(residents_order)
                 self._residents_ordered = residents_order
                 self.model = self.lijst_name
 
@@ -290,10 +295,10 @@ class LijstCoordinator(DataUpdateCoordinator):
                 daystr = "Today"
 
             for person in eet_event["event_attendees_all_users"]:
-                if not person["order"] in persons_dict:
-                    persons_dict[person["order"]] = person["user"]
-                    persons_dict[person["order"]]["next_week"] = {}
-                persons_dict[person["order"]]["next_week"][daystr] = {"status": person["status"], "number_guests": person["number_guests"]}
+                if not person["user"]["id"] in persons_dict:
+                    persons_dict[person["user"]["id"]] = person["user"]
+                    persons_dict[person["user"]["id"]]["next_week"] = {}
+                persons_dict[person["user"]["id"]]["next_week"][daystr] = {"status": person["status"], "number_guests": person["number_guests"]}
         return persons_dict
 
     def query_body_list(self) -> str:

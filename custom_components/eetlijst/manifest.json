@@ -6,8 +6,9 @@
   ],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://www.home-assistant.io/integrations/eetlijst",
+  "documentation": "https://github.com/Slalamander/Home-Assistant-Eetlijst",
   "version": "0.1.0",
+  "issue_tracker": "https://github.com/Slalamander/Home-Assistant-Eetlijst/issues",
   "iot_class": "cloud_polling",
   "requirements": [],
   "integration_type": "hub"

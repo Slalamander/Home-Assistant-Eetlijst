@@ -36,9 +36,11 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     (result, info) = await test_token(data["token"])
     if not result:
         if info is not None:
-            if info["errors"][0]["extensions"]["code"] == "invalid-jwt":
-                _LOGGER.exception("Invalid JWT Token")
+            if info["errors"][0]["extensions"]["code"] == "invalid-jwt" or info["errors"][0]["extensions"]["code"] == "invalid-headers":
+                _LOGGER.exception("Invalid JWT Token or Headers")
                 raise InvalidToken
+            else:
+                raise CannotConnect
         else:
             raise CannotConnect
 
