@@ -1,0 +1,14 @@
+{
+  "domain": "eetlijst",
+  "name": "Eetlijst",
+  "codeowners": [
+    "@Slalamander"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/eetlijst",
+  "version": "0.1.0",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "integration_type": "hub"
+}

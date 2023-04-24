@@ -1,0 +1,54 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Device is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error",
+            "invalid_token": "Invalid JWT Token"
+        },
+        "step": {
+            "user": {
+                "title": "Eetlijst JWT Token",
+                "description": "The token can be found when inspecting your browser local storage on www.eetlijst.nl",
+                "data": {
+                    "token": "Eetlijst JWT Token"
+                }
+            },
+            "options": {
+                "data": {
+                    "show_balance": "Show User Balance",
+                    "custom_pictures": "Custom Entity Pictures",
+                    "resident_units": "Resident names as unit of measurement"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "show_balance": "Show User Balance",
+                    "custom_pictures": "Custom Entity Pictures",
+                    "resident_units": "Resident names as unit of measurement"
+                }
+            }
+        },
+        "entity": {
+            "eetlijst_user": {
+                "state": {
+                    "eat_only": "Eating",
+                    "not_attending": "Not Eating"
+                }
+            }
+        }
+    },
+    "state": {
+        "eetlijst_user": {
+            "eat_only": "Eating",
+            "not_attending": "Not Eating"
+        }
+    }
+}

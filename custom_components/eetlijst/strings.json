@@ -1,0 +1,55 @@
+{
+  "title": "Eetlijst",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Eetlijst JWT Token",
+        "description": "The token can be found when inspecting your browser local storage on www.eetlijst.nl",
+        "data": {
+          "token": "[%key:common::config_flow::data::token%]"
+        }
+      },
+      "options": {
+        "data": {
+          "show_balance": "[%key:common::config_flow::data::show_balance%]",
+          "custom_pictures": "[%key:common::config_flow::data::custom_pictures%]",
+          "resident_units": "[%key:common::config_flow::data::resident_units%]"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]",
+      "invalid_token": "[%key:common::config_flow::error::invalid_token%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "show_balance": "[%key:common::config_flow::data::show_balance%]",
+          "custom_pictures": "[%key:common::config_flow::data::custom_pictures%]",
+          "resident_units": "[%key:common::config_flow::data::resident_units%]"
+        }
+      }
+    }
+  },
+  "entity": {
+    "eetlijst_user": {
+      "state": {
+        "eat_only": "Eating",
+        "not_attending": "Not Eating"
+      }
+    }
+  },
+  "state": {
+    "eetlijst_user": {
+      "eat_only": "Eating",
+      "not_attending": "Not Eating"
+    }
+  }
+}
