@@ -352,7 +352,7 @@ class EetlijstResident(SensorBase):
                 self._attr_state = day_text
                 if day_state["status"] == "not_attending":
                     attr_dict["eetstatus_num"] = 0
-                elif day_state["status"] is None or day_state["status"] is "dont_know_yet":
+                elif day_state["status"] is None or day_state["status"] == "dont_know_yet":
                     attr_dict["eetstatus_num"] = None
             else:
                 attr_dict[day] = day_text

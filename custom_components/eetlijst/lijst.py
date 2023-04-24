@@ -1,4 +1,4 @@
-"""A demonstration 'hub' that connects several devices."""
+"""A Eetlijst API Coordinator."""
 from __future__ import annotations
 
 # In a real implementation, this would be in an external library that's on PyPI.
@@ -166,7 +166,7 @@ class LijstCoordinator(DataUpdateCoordinator):
                     residents_order[user["user"]["id"]] = person
 
                 self.residents = residents
-                print(residents_order)
+                #print(residents_order)
                 self._residents_ordered = residents_order
                 self.model = self.lijst_name
 
