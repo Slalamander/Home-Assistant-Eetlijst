@@ -35,8 +35,8 @@ Next you can select a few options:
 <img src="https://github.com/Slalamander/Home-Assistant-Eetlijst/blob/main/images/sensor_options.png">
 
 ### Sensors
-After setting up, the integration will add a device for the Eetlijst list to your Home Assistant. This device has four types of sensors:
-- Info Sensor: shows info about the Eetlijst
+After setting up, the integration will add a device for the Eetlijst list to your Home Assistant. This device has four types of sensors, which refresh every 5 minutes:
+- Info Sensor: shows info about the Eetlijst (For some reason, this one is only handled at the first refresh, so it will appear later).
 - Today Sensor: shows a summary of today, who is cooking, who is eating along (and who isn't), and how many are.
 - Shopping List Sensor: imports the contents of the shopping list
 - Person sensor: Each person on the list gets their own sensor. Its state corresponds to that persons state for today, and in the attributes their status for the upcoming week is shown. If checked, the attributes will also show their balance.
@@ -85,6 +85,7 @@ states:
 ### TODO
 This is my first custom integration, so if you encounter any issues or bugs, please let me know. It's all still very bare bones, so there's a few things I hope to add in later versions:
 - Handle cases for the new option where a person is only doing the groceries (Correct statuses, custom image etc.)
+- Figure out why the info sensor is not updated upon adding.
 - Handle changes in lijst users (like when a roommate changes).
 - Figure out how to translate the states using localisation files. Somehow these would only work for the config.
 - Get it added as a default repository
