@@ -8,6 +8,7 @@ You can add this as a custom repository via HACS:
 - On the HACS page of your Home Assistant, in the upper right menu, click custom repositories
 - Copy the link to this repository and paste it in the repository field
 - Select integration as the category
+- Find it on the HACS page and click download
 
 Or copy the contents from `custom_components` directory to your home assistant `custom_components` folder.
 
@@ -26,7 +27,7 @@ After pasting the contents somewhere like a text file, copy the contents of the 
 
 Next you can select a few options:
 1. Show User Balance: Whether the monetary balance from eetlijst for a person should be shown
-2. Custom Entity Pictures: Instead of using an icon for the entities, the today sensor and resident sensors will use the custom images in `www/eetlijst_custom_pictures` in the frontend. These change dynamically depending on a person's state for the day, however I made these for an older version for the old eetlijst website, so they may not be to your liking anymore (though, as shown later, they may also have their uses).
+2. Custom Entity Pictures: Instead of using an icon for the entities, the today sensor and resident sensors will use the custom images in `www/eetlijst_custom_pictures` in the frontend. (You have to add these manually to your `www` folder in home assistant) These change dynamically depending on a person's state for the day, however I made these for an older version for the old eetlijst website, so they may not be to your liking anymore (though, as shown later, they may also have their uses).
 3. Residents name as unit of measurement: Sets the unit of measurement for a resident to their name. Useful when using badges to display the sensors.
 
 ### Sensors
@@ -36,5 +37,7 @@ After setting up, the integration will add a device for the Eetlijst list to you
 - Shopping List Sensor: imports the contents of the shopping list
 - Person sensor: Each person on the list gets their own sensor. Its state corresponds to that persons state for today, and in the attributes their status for the upcoming week is shown. If checked, the attributes will also show their balance.
 
+### Usage
+The idea of the residents sensor is that they can more or less function with badges. This is where the entity pictures and unit of measurements come in.
 
 
