@@ -334,6 +334,7 @@ class EetlijstResident(SensorBase):
 
             day_state = person_future["next_week"][day]
             day_text = None if day_state["status"] == "dont_know_yet" else day_state["status"]
+            if day_text == None: day_text = "unknown"
 
             if day_state["status"] == "cook" or day_state["status"] == "eat_only":
                 if day == "Today":
