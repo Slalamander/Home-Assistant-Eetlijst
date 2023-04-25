@@ -35,14 +35,6 @@
                     "resident_units": "Resident names as unit of measurement"
                 }
             }
-        },
-        "entity": {
-            "eetlijst_user": {
-                "state": {
-                    "eat_only": "Eating",
-                    "not_attending": "Not Eating"
-                }
-            }
         }
     },
     "state": {
