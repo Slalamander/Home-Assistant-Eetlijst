@@ -44,48 +44,32 @@ After setting up, the integration will add a device for the Eetlijst list to you
 ### Usage
 The idea of the residents sensor is that they can more or less function with badges. This is where the entity pictures and unit of measurements come in.
 
-Using the custom cards [State Switch](https://github.com/thomasloven/lovelace-state-switch) and [Badge Card](https://github.com/thomasloven/lovelace-badge-card), you can display the sensors like this:
+Using the custom card [Badge Card](https://github.com/thomasloven/lovelace-badge-card) and [Card Mod]([https://github.com/thomasloven/lovelace-badge-card](https://github.com/thomasloven/lovelace-card-mod)), you can display the sensors like this:
 <img src="https://github.com/Slalamander/Home-Assistant-Eetlijst/blob/main/images/eetlijst-badges.png">
 
-This is the code I used for one badge (though I wouldn't be surprised if there's a more efficient way to code these):
 ```yaml
-type: custom:state-switch
-entity: template
-template: >-
-  {% set sens = 'sensor.eetlijst_home_assistant_dummy_0' %}  {% if
-  state_attr(sens,'eetstatus_num') == None %} unkown 
-
-  {% else %}  {% set status = state_attr(sens,'eetstatus_num') %}  {% if status
-  == 0 %} signed_out  {% elif status > 0 %} cooking   {% elif status < 0 %} eating
-  {% endif %} {% endif %}
-states:
-  signed_out:
-    type: custom:badge-card
-    badges:
-      - entity: sensor.eetlijst_home_assistant_dummy_0
-        name: ''
-        style: |
-          :host {
-            --label-badge-background-color: rgba(0, 0, 0, 0.85);
-            --label-badge-red: slategrey;
-          }
-  cooking:
-    type: custom:badge-card
-    badges:
-      - entity: sensor.eetlijst_home_assistant_dummy_0
-        name: ''
-        style: |
-          :host {
-            --label-badge-background-color: rgba(0, 0, 0, 0.85);
-            --label-badge-red: #bd1313
-          }
-  eating: ...
+type: custom:badge-card
+badges:
+  - entity: sensor.eetlijst_home_assistant_dummy_0
+    name: ''
+    style: |
+      :host {
+        --label-badge-background-color: rgba(0, 0, 0, 0.85);
+        {% set sens = 'sensor.eetlijst_home_assistant_dummy_0' %}
+        {% set eetst = state_attr(sens,'eetstatus_num') %} 
+        {% if eetst == None %} 
+        --ha-label-badge-label-color: black; --label-badge-red: #f7f5f5;
+        {% else %} 
+         {% if eetst < 0 %} --label-badge-red: #377330; {% elif eetst > 0 %} --label-badge-red: #bd1313; {% elif eetst == 0 %} --label-badge-red: slategrey; {% endif %}
+        {% endif %}
+      }
 ```
 
 ### TODO
 This is my first custom integration, so if you encounter any issues or bugs, please let me know. It's all still very bare bones, so there's a few things I hope to add in later versions:
-- Handle cases for the new option where a person is only doing the groceries (Correct statuses, custom image etc.)
-- Figure out why the info sensor is not updated upon adding.
-- Handle changes in lijst users (like when a roommate changes).
-- Figure out how to translate the states using localisation files. Somehow these would only work for the config.
+- ~~Handle cases for the new option where a person is only doing the groceries (Correct statuses, custom image etc.)~~
+- ~~Figure out why the info sensor is not updated upon adding.~~ (For some reason the first entity in the `async_add_entitities` would not have its callback registered)
+- ~~Handle changes in lijst users (like when a roommate changes).~~ (Integration is now reloaded when it notices a change in the lijst' users)
+- ~~Figure out how to translate the states using localisation files. Somehow these would only work for the config.~~
+- Write translations for dutch and english
 - Get it added as a default repository
