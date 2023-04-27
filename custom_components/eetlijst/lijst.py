@@ -73,7 +73,7 @@ class LijstCoordinator(DataUpdateCoordinator):
 
 
     manufacturer = "Eetlijst"
-    def __init__(self, hass: HomeAssistant, token: str, config_data = None) -> None:
+    def __init__(self, hass: HomeAssistant, config_entry: str, config_data: None) -> None:
         """Init dummy hub."""
         super().__init__(
             hass,
@@ -83,10 +83,11 @@ class LijstCoordinator(DataUpdateCoordinator):
             # Polling interval. Will only be polled if there are subscribers.
             update_interval=SCAN_INTERVAL,
         )
-        self._token = token
+        self._token = config_data["token"] #token
         self._name = False
         self._hass = hass
-        self._id = token.lower()
+        self._id = self._token.lower()
+        self.entry_id = config_entry.entry_id
         self._callbacks = set()
         #self.firmware_version = f"0.0.{random.randint(1, 9)}"
         self.model = "Eetlijst"

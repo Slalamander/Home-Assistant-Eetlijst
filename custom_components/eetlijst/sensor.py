@@ -1,32 +1,27 @@
 """Platform for sensor integration."""
-# This file shows the setup for the sensors associated with the cover.
-# They are setup in the same way with the call to the async_setup_entry function
-# via HA from the module __init__. Each sensor has a device_class, this tells HA how
-# to display it in the UI (for know types). The unit_of_measurement property tells HA
-# what the unit is, so it can display the correct range. For predefined types (such as
-# battery), the unit_of_measurement should match what's expected.
-
 from homeassistant.helpers.entity import Entity
 from homeassistant.core import callback
 from .const import DOMAIN
+import logging
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 ICON_FOLDER = "/local/eetlijst_custom_pictures/"
 ICON_BASE = ICON_FOLDER + "eetlijst_{}.svg"
+
+LOGGER: logging.Logger = logging.getLogger(__package__)
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Add sensors for passed config_entry in HA."""
     lijst = hass.data[DOMAIN][config_entry.entry_id]
     await lijst.setuplijst()
     await lijst.async_config_entry_first_refresh()
-    new_devices = []
-    infosensor = EetlijstInfo(lijst)
-    new_devices.append(infosensor)
+    new_devices = [SensorBase(lijst)]   #Not sure why but async_add skips the first entity, so addeda dummy entity in there
+    new_devices.append(EetlijstInfo(lijst))
     new_devices.append(EetlijstVandaag(lijst))
     new_devices.append(ShoppingList(lijst))
     for idx, person_id in enumerate(lijst._residents_ordered):
-        residentSensor = EetlijstResident(eetlijst=lijst, person_id=person_id, sensor_idx=idx)
-        new_devices.append(residentSensor)
+        new_devices.append(EetlijstResident(eetlijst=lijst, person_id=person_id, sensor_idx=idx))
 
     if new_devices:
         async_add_entities(new_devices, update_before_add=True)
@@ -40,7 +35,7 @@ class SensorBase(CoordinatorEntity, Entity):
         """Initialize the sensor."""
         super().__init__(lijst)
         self._eetlijst = lijst
-        self.idx = 0
+        #self.idx = 0
 
     @property
     def device_info(self):
@@ -58,52 +53,26 @@ class SensorBase(CoordinatorEntity, Entity):
         """Return True if roller and hub is available."""
         return True
 
-    # async def async_added_to_hass(self):
-    #     """Run when this Entity has been added to HA."""
-    #     # Sensors should also register callbacks to HA when their state changes
-    #     self._eetlijst.register_callback(self.async_write_ha_state)
-
-    # async def async_will_remove_from_hass(self):
-    #     """Entity being removed from hass."""
-    #     # The opposite of async_added_to_hass. Remove any registered call backs here.
-    #     self._eetlijst.remove_callback(self.async_write_ha_state)
-
 
 class EetlijstInfo(SensorBase):
     """Sensor with information about the Eetlijst."""
-
-    def __init__(self, eetlijst) -> None:
+    def __init__(self, eetlijst):
         """Initialize the sensor."""
         super().__init__(eetlijst)
+
         self._attr_unique_id = f"{self._eetlijst._id}_info"
 
         self._attr_name = f"Eetlijst {self._eetlijst.lijst_name} Info"
         self._attr_icon = "mdi:home-analytics"
         self._attr_state = None
+        self._state = None
+        self._extra_state_attributes = None
         self._attr_extra_state_attributes = None
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        #This is not called when setting up; idk why
-        attr_dict = {}
-        attr_keys = ["city", "adress", "name"]
-        info = self._eetlijst.lijst_info
-        for key in attr_keys:
-            if key in info:
-                attr_dict[key] = info[key]
-
-        residents = []
-        for user in info["users_in_groups"]:
-            person = user["user"]["name"]
-            residents.append(person)
-        attr_dict["residents"] = residents
-        self._attr_extra_state_attributes = attr_dict
-        self._attr_state = self._eetlijst.lijst_info["active"]
-        self.async_write_ha_state()
+        self._suggested_unit_of_measurement = "Active"
+        self._updates = 0
 
     @property
-    def name(self) -> str | None:
+    def name(self):# -> str | None:
         return self._attr_name
 
     @property
@@ -115,13 +84,43 @@ class EetlijstInfo(SensorBase):
     def extra_state_attributes(self):
         return self._attr_extra_state_attributes
 
-    @property
-    def unit_of_measurement(self) -> str | None:
-        return "Active"
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        #info = self._eetlijst.lijst_info
+        self._updates += 1
+        users_change = False
+        info = self.coordinator.data["info"]["eetschema_group"][0]
+        attr_dict = {}
+        attr_keys = ["city", "adress", "name"]
+        for key in attr_keys:
+            if key in info:
+                attr_dict[key] = info[key]
 
-    @property
-    def icon(self) -> str | None:
-        return self._attr_icon
+        residents = []
+        for user in info["users_in_groups"]:
+            person = user["user"]["name"]
+            residents.append(person)
+            user_id = user["user"]["id"]
+            if user_id not in self.coordinator._residents_ordered:
+                users_change = True
+
+
+        if len(self.coordinator._residents_ordered) is not len(info["users_in_groups"]):
+            users_change = True
+
+        if users_change:
+            _LOGGER.warning("A change in the lijst users has been detected, reloading component")
+            self.hass.create_task(
+                self.hass.config_entries.async_reload(entry_id = self.coordinator.entry_id)
+            )
+            return
+
+        attr_dict["residents"] = residents
+        self._attr_extra_state_attributes = attr_dict
+        #self._attr_state = self._eetlijst.lijst_info["active"]
+        self._attr_state = info[ "active"]
+        self.async_write_ha_state()
 
 class EetlijstVandaag(SensorBase):
     """Sensor with information about today."""
@@ -157,8 +156,8 @@ class EetlijstVandaag(SensorBase):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         today = self.coordinator.data["today"]["eetschema_event"][0]
-        attr_dict = {"total eaters": 0, "Eating": [], "Not Eating": [], "Unknown": []}
-        check_dict = ["Eating", "Not Eating", "Unknown"]
+        attr_dict = {"total eaters": 0, "Eating": [], "Shopping": [], "Not Eating": [], "Unknown": []}
+        check_dict = ["Eating", "Shopping", "Not Eating", "Unknown"]
         cook = "Nobody"
         for person_state in today["event_attendees_all_users"]:
             person = person_state["user"]["name"]
@@ -179,6 +178,10 @@ class EetlijstVandaag(SensorBase):
                 attr_dict["total eaters"] += 1 + person_eaters
             elif person_state["status"] == "eat_only":
                 attr_dict["Eating"].append(person_text)
+                attr_dict["total eaters"] += 1 + person_eaters
+            elif person_state["status"] == "got_groceries":
+                attr_dict["Eating"].append(person_text)
+                attr_dict["Shopping"].append(person)
                 attr_dict["total eaters"] += 1 + person_eaters
             elif person_state["status"] == "not_attending":
                 attr_dict["Not Eating"].append(person)
@@ -301,6 +304,7 @@ class EetlijstResident(SensorBase):
 
     @property
     def state(self):
+        #print(f"{self._person_name}: {self._attr_state}")
         return self._attr_state
 
     @property
@@ -317,62 +321,68 @@ class EetlijstResident(SensorBase):
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        person_future = self.coordinator.data["future"][self._person_id]
-        self._attr_unit_of_measurement = self._person_name
-        attr_dict = {}
-        #print(f"Updating Person {self._person_name}")
-        if self._eetlijst._config_options["show_balance"]:
-            for entry in self.coordinator.data["info"]["eetschema_group"][0]["summary"]:
-                if entry["user_id"] == self._person_id:
-                    balance = entry["payed_total"] / 100
-                    #self._attr_extra_state_attributes["Balance"] = f"€{balance:.2f}"
-                    attr_dict["Balance"] = f"€{balance:.2f}"
-
-        attr_dict["eetstatus_num"] = None
-        for day in person_future["next_week"]:
-            #if day == "Today": continue
-
-            day_state = person_future["next_week"][day]
-            day_text = None if day_state["status"] == "dont_know_yet" else day_state["status"]
-            if day_text == None: day_text = "unknown"
-
-            if day_state["status"] == "cook" or day_state["status"] == "eat_only":
-                if day == "Today":
-                    attr_dict["eetstatus_num"] = 1 if day_state["status"] == "cook" else -1
-
-                if isinstance(day_state["number_guests"], int):
-                    if day_state["number_guests"] > 0:
-                        day_eaters = day_state["number_guests"]
-                        if day == "Today":
-                            attr_dict["eetstatus_num"] = 1 + day_eaters if day_state["status"] == "cook" else -1 - day_eaters
-                            self._attr_unit_of_measurement = f'{self._person_name} + {day_state["number_guests"]}'
-                        else:
-                            day_text = f"{day_text} + {day_eaters}"
-
-            if day == "Today":
-                self._attr_state = day_text
-                if day_state["status"] == "not_attending":
-                    attr_dict["eetstatus_num"] = 0
-                elif day_state["status"] is None or day_state["status"] == "dont_know_yet":
-                    attr_dict["eetstatus_num"] = None
-            else:
-                attr_dict[day] = day_text
-
-        if attr_dict["eetstatus_num"] == None:
-            self._attr_entity_picture = ICON_BASE.format("none")
+        if self._person_id not in self.coordinator.data["future"]:
+            """Case for when the person has been removed, otherwise it throws an error"""
+            pass
         else:
-            if attr_dict["eetstatus_num"] > 4:
-                eetnum = 5
-            elif attr_dict["eetstatus_num"] < -4:
-                eetnum = -5
+
+            person_future = self.coordinator.data["future"][self._person_id]
+            self._attr_unit_of_measurement = self._person_name
+            attr_dict = {}
+            #print(f"Updating Person {self._person_name}")
+            if self._eetlijst._config_options["show_balance"]:
+                for entry in self.coordinator.data["info"]["eetschema_group"][0]["summary"]:
+                    if entry["user_id"] == self._person_id:
+                        balance = entry["payed_total"] / 100
+                        attr_dict["Balance"] = f"€{balance:.2f}"
+
+            attr_dict["eetstatus_num"] = None
+            for day in person_future["next_week"]:
+
+                day_state = person_future["next_week"][day]
+                day_text = None if day_state["status"] == "dont_know_yet" else day_state["status"]
+                if day_text is None: day_text = "not_set"
+
+                if day_state["status"] == "cook" or day_state["status"] == "eat_only" or day_state["status"] == "got_groceries":
+                    if day == "Today":
+                        attr_dict["eetstatus_num"] = 1 if day_state["status"] == "cook" else -1
+
+                    if isinstance(day_state["number_guests"], int):
+                        if day_state["number_guests"] > 0:
+                            day_eaters = day_state["number_guests"]
+                            if day == "Today":
+                                attr_dict["eetstatus_num"] = 1 + day_eaters if day_state["status"] == "cook" else -1 - day_eaters
+                                self._attr_unit_of_measurement = f'{self._person_name} + {day_state["number_guests"]}'
+                            else:
+                                day_text = f"{day_text} + {day_eaters}"
+
+                if day == "Today":
+                    self._attr_state = day_text
+                    if day_state["status"] == "not_attending":
+                        attr_dict["eetstatus_num"] = 0
+                    elif day_state["status"] is None or day_state["status"] == "dont_know_yet":
+                        attr_dict["eetstatus_num"] = None
+                else:
+                    attr_dict[day] = day_text
+
+            if attr_dict["eetstatus_num"] == None:
+                self._attr_entity_picture = ICON_BASE.format("none")
             else:
-                eetnum = attr_dict["eetstatus_num"]
-            self._attr_entity_picture = ICON_BASE.format(eetnum)
+                if attr_dict["eetstatus_num"] > 4:
+                    eetnum = 5
+                elif attr_dict["eetstatus_num"] < -4:
+                    eetnum = -5
+                else:
+                    eetnum = attr_dict["eetstatus_num"]
+                if person_future["next_week"]["Today"]["status"] == "got_groceries":
+                    self._attr_entity_picture = ICON_BASE.format(f"shop_{eetnum}")
+                else:
+                    self._attr_entity_picture = ICON_BASE.format(eetnum)
 
-        if not self._eetlijst._config_options["custom_pictures"]:
-            self._attr_entity_picture = None
+            if not self._eetlijst._config_options["custom_pictures"]:
+                self._attr_entity_picture = None
 
-        self._attr_extra_state_attributes = attr_dict
-        self._attr_name = f"Eetstatus {self._person_name}"
-        self.async_write_ha_state()
+            self._attr_extra_state_attributes = attr_dict
+            self._attr_name = f"Eetstatus {self._person_name}"
+            self.async_write_ha_state()
         # Use an attr eetstatus_num as an integer value for the badge cards

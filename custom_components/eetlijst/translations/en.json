@@ -37,10 +37,14 @@
             }
         }
     },
-    "state": {
-        "eetlijst_user": {
-            "eat_only": "Eating",
-            "not_attending": "Not Eating"
+    "entity": {
+        "sensor": {
+            "eetlijst_user": {
+                "state": {
+                    "eat_only": "Eating",
+                    "not_attending": "Not Eating"
+                }
+            }
         }
     }
 }
