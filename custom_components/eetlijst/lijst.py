@@ -1,19 +1,19 @@
 """A Eetlijst API Coordinator."""
 from __future__ import annotations
 
+import logging
+from datetime import datetime, timedelta
+
 # In a real implementation, this would be in an external library that's on PyPI.
 # The PyPI package needs to be included in the `requirements` section of manifest.json
 # See https://developers.home-assistant.io/docs/creating_integration_manifest
 # for more information.
 # This dummy hub always returns 3 rollers.
 import aiohttp
-from datetime import datetime, timedelta
-import logging
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+
 from .const import DOMAIN, REFRESH
-from homeassistant.helpers.update_coordinator import (
-    DataUpdateCoordinator,
-)
 
 APIURL = "https://api.samenn.nl/v1/graphql"
 SCAN_INTERVAL = timedelta(seconds=REFRESH)
@@ -71,9 +71,8 @@ async def test_token(token) -> bool:
 class LijstCoordinator(DataUpdateCoordinator):
     """Dummy Home for Eetlijst testing."""
 
-
     manufacturer = "Eetlijst"
-    def __init__(self, hass: HomeAssistant, config_entry: str, config_data: None) -> None:
+    def __init__(self, hass: HomeAssistant, config_entry, config_data: None) -> None:
         """Init dummy hub."""
         super().__init__(
             hass,
@@ -296,7 +295,7 @@ class LijstCoordinator(DataUpdateCoordinator):
                 daystr = "Today"
 
             for person in eet_event["event_attendees_all_users"]:
-                if not person["user"]["id"] in persons_dict:
+                if person["user"]["id"] not in persons_dict:
                     persons_dict[person["user"]["id"]] = person["user"]
                     persons_dict[person["user"]["id"]]["next_week"] = {}
                 persons_dict[person["user"]["id"]]["next_week"][daystr] = {"status": person["status"], "number_guests": person["number_guests"]}

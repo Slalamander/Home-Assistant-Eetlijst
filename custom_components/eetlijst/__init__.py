@@ -1,4 +1,4 @@
-"""Eetlijst integration"""
+"""Eetlijst integration."""
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
@@ -17,7 +17,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Store an instance of the "connecting" class that does the work of speaking
     # with your actual devices.
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = lijst.LijstCoordinator(
-        hass, entry.data["token"], entry.data
+        hass, entry, entry.data
     )
     entry.async_on_unload(entry.add_update_listener(lijst.options_update_listener))
 
