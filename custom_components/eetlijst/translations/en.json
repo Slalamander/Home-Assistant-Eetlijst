@@ -42,7 +42,10 @@
             "eetlijst_user": {
                 "state": {
                     "eat_only": "Eating",
-                    "not_attending": "Not Eating"
+                    "not_attending": "Not Eating",
+                    "not_set": "Not Set",
+                    "got_groceries": "Shopping",
+                    "cook": "Cooking"
                 }
             }
         }

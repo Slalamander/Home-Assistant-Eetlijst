@@ -42,7 +42,10 @@
       "eetlijst_user": {
         "state": {
           "eat_only": "[%key:common::entity::sensor::eetlijst_user::state::eat_only%]",
-          "not_attending": "[%key:common::entity::sensor::eetlijst_user::state::not_attending%]"
+          "not_attending": "[%key:common::entity::sensor::eetlijst_user::state::not_attending%]",
+          "not_set": "[%key:common::entity::sensor::eetlijst_user::state::not_set%]",
+          "got_groceries": "[%key:common::entity::sensor::eetlijst_user::state::got_groceries%]",
+          "cook": "[%key:common::entity::sensor::eetlijst_user::state::cook%]"
         }
       }
     }
