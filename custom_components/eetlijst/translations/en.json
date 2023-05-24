@@ -21,7 +21,8 @@
                 "data": {
                     "show_balance": "Show User Balance",
                     "custom_pictures": "Custom Entity Pictures",
-                    "resident_units": "Resident names as unit of measurement"
+                    "resident_units": "Resident names as unit of measurement",
+                    "use_external_url": "Use External URL for entity pictures"
                 }
             }
         }
@@ -32,7 +33,8 @@
                 "data": {
                     "show_balance": "Show User Balance",
                     "custom_pictures": "Custom Entity Pictures",
-                    "resident_units": "Resident names as unit of measurement"
+                    "resident_units": "Resident names as unit of measurement",
+                    "use_external_url": "Use External URL for entity pictures"
                 }
             }
         }

@@ -12,7 +12,8 @@
         "data": {
           "show_balance": "[%key:common::config_flow::data::show_balance%]",
           "custom_pictures": "[%key:common::config_flow::data::custom_pictures%]",
-          "resident_units": "[%key:common::config_flow::data::resident_units%]"
+          "resident_units": "[%key:common::config_flow::data::resident_units%]",
+          "use_external_url": "[%key:common::config_flow::data::use_external_url%]"
         }
       }
     },
@@ -32,7 +33,8 @@
         "data": {
           "show_balance": "[%key:common::config_flow::data::show_balance%]",
           "custom_pictures": "[%key:common::config_flow::data::custom_pictures%]",
-          "resident_units": "[%key:common::config_flow::data::resident_units%]"
+          "resident_units": "[%key:common::config_flow::data::resident_units%]",
+          "use_external_url": "[%key:common::config_flow::data::use_external_url%]"
         }
       }
     }
@@ -42,10 +44,7 @@
       "eetlijst_user": {
         "state": {
           "eat_only": "[%key:common::entity::sensor::eetlijst_user::state::eat_only%]",
-          "not_attending": "[%key:common::entity::sensor::eetlijst_user::state::not_attending%]",
-          "not_set": "[%key:common::entity::sensor::eetlijst_user::state::not_set%]",
-          "got_groceries": "[%key:common::entity::sensor::eetlijst_user::state::got_groceries%]",
-          "cook": "[%key:common::entity::sensor::eetlijst_user::state::cook%]"
+          "not_attending": "[%key:common::entity::sensor::eetlijst_user::state::not_attending%]"
         }
       }
     }

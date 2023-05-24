@@ -21,7 +21,8 @@ OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Required("show_balance", default=False): bool,
         vol.Required("custom_pictures", default=False): bool,
-        vol.Required("resident_units", default=False): bool
+        vol.Required("resident_units", default=False): bool,
+        vol.Required("use_external_url", default=False): bool
     }
 )
 
@@ -104,11 +105,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         self.config_entry = config_entry
+        print(OPTIONS_SCHEMA.schema)
+        opt_set = {}
+        for opt in OPTIONS_SCHEMA.schema:
+            if opt in config_entry.data:
+                opt_set[opt] = config_entry.data[opt]
+            else:
+                opt_set[opt] = False
+
         self.options_schema = vol.Schema(
         {
-            vol.Required("show_balance", default=config_entry.data["show_balance"]): bool,
-            vol.Required("custom_pictures", default=config_entry.data["custom_pictures"]): bool,
-            vol.Required("resident_units", default=config_entry.data["resident_units"]): bool
+            vol.Required("show_balance", default=opt_set["show_balance"]): bool,
+            vol.Required("custom_pictures", default=opt_set["custom_pictures"]): bool,
+            vol.Required("resident_units", default=opt_set["resident_units"]): bool,
+            vol.Required("use_external_url", default=opt_set["use_external_url"]): bool
         }
     )
 

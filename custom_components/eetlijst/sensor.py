@@ -12,10 +12,21 @@ LOGGER: logging.Logger = logging.getLogger(__package__)
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
+    global ICON_FOLDER
+    global ICON_BASE
     """Add sensors for passed config_entry in HA."""
     lijst = hass.data[DOMAIN][config_entry.entry_id]
     await lijst.setuplijst()
     await lijst.async_config_entry_first_refresh()
+
+    try:
+        if config_entry.data["use_external_url"]:
+            ext_url = hass.config.external_url
+            ICON_FOLDER = ext_url + ICON_FOLDER
+            ICON_BASE = ICON_FOLDER + "eetlijst_{}.svg"
+    except Exception:
+        pass
+
     new_devices = [SensorBase(lijst)]   #Not sure why but async_add skips the first entity, so addeda dummy entity in there
     new_devices.append(EetlijstInfo(lijst))
     new_devices.append(EetlijstVandaag(lijst))
@@ -155,6 +166,11 @@ class EetlijstVandaag(SensorBase):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
+
+        if len(self.coordinator.data["today"]["eetschema_event"]) < 1:
+            LOGGER.debug("Eetschema event empty")
+            return
+
         today = self.coordinator.data["today"]["eetschema_event"][0]
         attr_dict = {"total eaters": 0, "Eating": [], "Shopping": [], "Not Eating": [], "Unknown": []}
         check_dict = ["Eating", "Shopping", "Not Eating", "Unknown"]
@@ -212,6 +228,11 @@ class EetlijstVandaag(SensorBase):
         self.async_write_ha_state()
 
     def build_attr_dict(self):
+        if len(self.coordinator.data["today"]["eetschema_event"]) < 1:
+            return
+        # else:
+        #     print(self.coordinator.data["today"]["eetschema_event"])
+
         today = self.coordinator.data["today"]["eetschema_event"][0]
         attr_dict = {"cook": "Nobody", "eaters": []}
         for person_state in today["event_attendees_all_users"]:

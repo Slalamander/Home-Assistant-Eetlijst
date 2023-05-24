@@ -31,6 +31,7 @@ Next you can select a few options:
 1. Show User Balance: Whether the monetary balance from eetlijst for a person should be shown
 2. Custom Entity Pictures: Instead of using an icon for the entities, the today sensor and resident sensors will use the custom images in `www/eetlijst_custom_pictures` in the frontend. (You have to add these manually to your `www` folder in home assistant) These change dynamically depending on a person's state for the day, however I made these for an older version for the old eetlijst website, so they may not be to your liking anymore (though, as shown later, they may also have their uses).
 3. Residents name as unit of measurement: Sets the unit of measurement for a resident to their name. Useful when using badges to display the sensors.
+4. Use external URL for entity pictures: Serves the custom entity pictures over your external url, if defined in your `configuration.yaml` file. Required when you want to show the custom entity pictures on e.g. a google chromecast device.
 
 <img src="https://github.com/Slalamander/Home-Assistant-Eetlijst/blob/main/images/sensor_options.png">
 
@@ -56,10 +57,10 @@ badges:
       :host {
         --label-badge-background-color: rgba(0, 0, 0, 0.85);
         {% set sens = 'sensor.eetlijst_home_assistant_dummy_0' %}
-        {% set eetst = state_attr(sens,'eetstatus_num') %} 
-        {% if eetst == None %} 
+        {% set eetst = state_attr(sens,'eetstatus_num') %}
+        {% if eetst == None %}
         --ha-label-badge-label-color: black; --label-badge-red: #f7f5f5;
-        {% else %} 
+        {% else %}
          {% if eetst < 0 %} --label-badge-red: #377330; {% elif eetst > 0 %} --label-badge-red: #bd1313; {% elif eetst == 0 %} --label-badge-red: slategrey; {% endif %}
         {% endif %}
       }
