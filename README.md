@@ -2,15 +2,14 @@
 
 This integration uses the API of the new [Eetlijst](https://eetlijst.nl/)  website, so you can check the eating status of you and your roommate from your home assistant instance.
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 ### Installation
 
-You can add this as a custom repository via HACS:
-- On the HACS page of your Home Assistant, in the upper right menu, click custom repositories
-- Copy the link to this repository and paste it in the repository field
-- Select integration as the category
-- Find it on the HACS page and click download
+You can add this as a default repository via HACS:
+- On the HACS page of your Home Assistant, go to integrations
+- Search for "Eetlijst"
+- Download and restart your Home Assistant Instance
 
 Or copy the contents from `custom_components` directory to your home assistant `custom_components` folder.
 
@@ -34,6 +33,8 @@ Next you can select a few options:
 4. Use external URL for entity pictures: Serves the custom entity pictures over your external url, if defined in your `configuration.yaml` file. Required when you want to show the custom entity pictures on e.g. a google chromecast device.
 
 <img src="https://github.com/Slalamander/Home-Assistant-Eetlijst/blob/main/images/sensor_options.png">
+
+If your sensors stop updating, or give an `unavailable` state (or similar), check your logs. There is a good chance your JWT token has expired. If you go to the integration page, and click options, you can update your JWT token.
 
 ### Sensors
 After setting up, the integration will add a device for the Eetlijst list to your Home Assistant. This device has four types of sensors, which refresh every 5 minutes:
@@ -73,4 +74,4 @@ This is my first custom integration, so if you encounter any issues or bugs, ple
 - ~~Handle changes in lijst users (like when a roommate changes).~~ (Integration is now reloaded when it notices a change in the lijst' users)
 - ~~Figure out how to translate the states using localisation files. Somehow these would only work for the config.~~
 - Write translations for dutch and english
-- Get it added as a default repository
+- ~~Get it added as a default repository~~
