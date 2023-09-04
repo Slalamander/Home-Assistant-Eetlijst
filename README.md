@@ -4,6 +4,8 @@ This integration uses the API of the new [Eetlijst](https://eetlijst.nl/)  websi
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
+If your sensors stop updating, or give an `unavailable` state (or similar), check your logs. There is a good chance your JWT token has expired. If you go to the integration page, and click options, you can update your JWT token.
+
 ### Installation
 
 You can add this as a default repository via HACS:
@@ -33,8 +35,6 @@ Next you can select a few options:
 4. Use external URL for entity pictures: Serves the custom entity pictures over your external url, if defined in your `configuration.yaml` file. Required when you want to show the custom entity pictures on e.g. a google chromecast device.
 
 <img src="https://github.com/Slalamander/Home-Assistant-Eetlijst/blob/main/images/sensor_options.png">
-
-If your sensors stop updating, or give an `unavailable` state (or similar), check your logs. There is a good chance your JWT token has expired. If you go to the integration page, and click options, you can update your JWT token.
 
 ### Sensors
 After setting up, the integration will add a device for the Eetlijst list to your Home Assistant. This device has four types of sensors, which refresh every 5 minutes:
