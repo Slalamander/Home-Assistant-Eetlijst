@@ -28,13 +28,23 @@
         }
     },
     "options": {
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error",
+            "invalid_token": "Invalid JWT Token"
+        },
         "step": {
             "init": {
                 "data": {
                     "show_balance": "Show User Balance",
                     "custom_pictures": "Custom Entity Pictures",
                     "resident_units": "Resident names as unit of measurement",
-                    "use_external_url": "Use External URL for entity pictures"
+                    "use_external_url": "Use External URL for entity pictures",
+                    "update_jwt_token": "New JWT Token"
+                },
+                "data_description": {
+                    "update_jwt_token": "If old one expired; leave blank to not update"
                 }
             }
         }

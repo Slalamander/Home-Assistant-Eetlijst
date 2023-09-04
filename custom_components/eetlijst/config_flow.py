@@ -10,6 +10,10 @@ from .const import DOMAIN  # pylint:disable=unused-import
 from .lijst import test_token
 
 _LOGGER = logging.getLogger(__name__)
+# _LOGGER.setLevel(10)
+_LOGGER.debug(
+    f"Eetlijst logging at level {_LOGGER.getEffectiveLevel()} under name {_LOGGER.name}"
+)
 
 DATA_SCHEMA = vol.Schema(
     {
@@ -22,9 +26,10 @@ OPTIONS_SCHEMA = vol.Schema(
         vol.Required("show_balance", default=False): bool,
         vol.Required("custom_pictures", default=False): bool,
         vol.Required("resident_units", default=False): bool,
-        vol.Required("use_external_url", default=False): bool
+        vol.Required("use_external_url", default=False): bool,
     }
 )
+
 
 async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     """Validate the user input allows us to connect.
@@ -34,10 +39,14 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     if len(data["token"]) < 3:
         raise InvalidHost
 
+    _LOGGER.debug("Validating eetlijst data")
     (result, info) = await test_token(data["token"])
     if not result:
         if info is not None:
-            if info["errors"][0]["extensions"]["code"] == "invalid-jwt" or info["errors"][0]["extensions"]["code"] == "invalid-headers":
+            if (
+                info["errors"][0]["extensions"]["code"] == "invalid-jwt"
+                or info["errors"][0]["extensions"]["code"] == "invalid-headers"
+            ):
                 _LOGGER.exception("Invalid JWT Token or Headers")
                 raise InvalidToken
             else:
@@ -83,13 +92,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user", data_schema=DATA_SCHEMA, errors=errors
         )
 
-    async def async_step_options(self, user_input = None, title=None):
+    async def async_step_options(self, user_input=None, title=None):
         errors: dict[str, str] = {}
         if user_input is not None:
-                for input_key in user_input:
-                    self.data[input_key] = user_input[input_key]
+            for input_key in user_input:
+                self.data[input_key] = user_input[input_key]
 
-                return self.async_create_entry(title="Eetlijst {}".format(self.data["title"]), data=self.data)
+            return self.async_create_entry(
+                title="Eetlijst {}".format(self.data["title"]), data=self.data
+            )
 
         return self.async_show_form(
             step_id="options", data_schema=OPTIONS_SCHEMA, errors=errors
@@ -97,15 +108,17 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry: config_entries.ConfigEntry,) -> config_entries.OptionsFlow:
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> config_entries.OptionsFlow:
         """Create the options flow."""
         return OptionsFlowHandler(config_entry)
+
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
         self.config_entry = config_entry
-        print(OPTIONS_SCHEMA.schema)
         opt_set = {}
         for opt in OPTIONS_SCHEMA.schema:
             if opt in config_entry.data:
@@ -114,13 +127,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 opt_set[opt] = False
 
         self.options_schema = vol.Schema(
-        {
-            vol.Required("show_balance", default=opt_set["show_balance"]): bool,
-            vol.Required("custom_pictures", default=opt_set["custom_pictures"]): bool,
-            vol.Required("resident_units", default=opt_set["resident_units"]): bool,
-            vol.Required("use_external_url", default=opt_set["use_external_url"]): bool
-        }
-    )
+            {
+                vol.Required("show_balance", default=opt_set["show_balance"]): bool,
+                vol.Required(
+                    "custom_pictures", default=opt_set["custom_pictures"]
+                ): bool,
+                vol.Required("resident_units", default=opt_set["resident_units"]): bool,
+                vol.Required(
+                    "use_external_url", default=opt_set["use_external_url"]
+                ): bool,
+                vol.Optional("update_jwt_token"): str,
+            }
+        )
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -129,12 +147,28 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         errors = {}
 
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            try:
+                if "update_jwt_token" in user_input:
+                    _LOGGER.debug("Got new Eetlijst JWT token")
+                    validate_dict = {}
+                    validate_dict["token"] = user_input["update_jwt_token"]
+                    info = await validate_input(self.hass, validate_dict)
+                    # (result, info) = await test_token(user_input["update_jwt_token"])
+                return self.async_create_entry(title="", data=user_input)
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except InvalidHost:
+                errors["base"] = "cannot_connect"
+            except InvalidToken:
+                errors["base"] = "invalid_token"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
 
         return self.async_show_form(
-            step_id="init",
-            data_schema= self.options_schema, errors=errors
-            )
+            step_id="init", data_schema=self.options_schema, errors=errors
+        )
+
 
 class CannotConnect(exceptions.HomeAssistantError):
     """Error to indicate we cannot connect."""
@@ -142,6 +176,7 @@ class CannotConnect(exceptions.HomeAssistantError):
 
 class InvalidHost(exceptions.HomeAssistantError):
     """Error to indicate there is an invalid hostname."""
+
 
 class InvalidToken(exceptions.HomeAssistantError):
     """Error to indicate there is an invalid hostname."""
