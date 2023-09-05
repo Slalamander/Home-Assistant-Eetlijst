@@ -21,7 +21,8 @@
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
       "unknown": "[%key:common::config_flow::error::unknown%]",
-      "invalid_token": "[%key:common::config_flow::error::invalid_token%]"
+      "invalid_token": "[%key:common::config_flow::error::invalid_token%]",
+      "token_expired": "[%key:common::config_flow::error::token_expired%]"
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
@@ -29,13 +30,18 @@
   },
   "options": {
     "step": {
-      "init": {
+      "option_step": {
         "data": {
           "show_balance": "[%key:common::config_flow::data::show_balance%]",
           "custom_pictures": "[%key:common::config_flow::data::custom_pictures%]",
           "resident_units": "[%key:common::config_flow::data::resident_units%]",
           "use_external_url": "[%key:common::config_flow::data::use_external_url%]"
         }
+      },
+      "setjwt": {
+        "title": "Eetlijst JWT Token expired",
+        "description": "A new token can be found when inspecting your browser local storage on www.eetlijst.nl",
+        "data": {"update_jwt_token": "[%key:common::options_flow::data::update_jwt_token%]"}
       }
     }
   },

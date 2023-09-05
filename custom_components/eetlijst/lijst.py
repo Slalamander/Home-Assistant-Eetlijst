@@ -1,19 +1,19 @@
 """A Eetlijst API Coordinator."""
 from __future__ import annotations
 
-import logging
-from datetime import datetime, timedelta
-
 # In a real implementation, this would be in an external library that's on PyPI.
 # The PyPI package needs to be included in the `requirements` section of manifest.json
 # See https://developers.home-assistant.io/docs/creating_integration_manifest
 # for more information.
 # This dummy hub always returns 3 rollers.
 import aiohttp
+from datetime import datetime, timedelta
+import logging
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-
 from .const import DOMAIN, REFRESH
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,
+)
 
 APIURL = "https://api.samenn.nl/v1/graphql"
 SCAN_INTERVAL = timedelta(seconds=REFRESH)
@@ -21,7 +21,9 @@ SCAN_INTERVAL = timedelta(seconds=REFRESH)
 LOGGER: logging.Logger = logging.getLogger(__package__)
 _LOGGER = logging.getLogger(__name__)
 
+
 async def options_update_listener(hass: HomeAssistant, entry):
+    _LOGGER.debug("Updating Eetlijst Entry")
     new_options = entry.options
     lijst = hass.data[DOMAIN][entry.entry_id]
     current_conf = {}
@@ -30,9 +32,11 @@ async def options_update_listener(hass: HomeAssistant, entry):
 
     for option in entry.options:
         current_conf[option] = new_options[option]
-    setattr(lijst, '_config_options', current_conf)
-    setattr(entry, 'data', current_conf)
+
+    setattr(lijst, "_config_options", current_conf)
+    setattr(entry, "data", current_conf)
     lijst.async_update_listeners()
+
 
 async def test_token(token) -> bool:
     """Test connectivity to the API is OK."""
@@ -58,8 +62,7 @@ async def test_token(token) -> bool:
             respjson = await resp.json()
             if resp.status == 200:
                 if "errors" in respjson:
-                    print("Got an error in connecting to the API; printing")
-                    print(respjson)
+                    _LOGGER.error(f"Got an error in connecting to the API {respjson}")
                     return (False, respjson)
                 else:
                     eetlijst_info = respjson["data"]["eetschema_group"][0]
@@ -68,11 +71,15 @@ async def test_token(token) -> bool:
             else:
                 return (False, None)
 
+
 class LijstCoordinator(DataUpdateCoordinator):
     """Dummy Home for Eetlijst testing."""
 
     manufacturer = "Eetlijst"
-    def __init__(self, hass: HomeAssistant, config_entry, config_data: None) -> None:
+
+    def __init__(
+        self, hass: HomeAssistant, config_entry: str, config_data: None
+    ) -> None:
         """Init dummy hub."""
         super().__init__(
             hass,
@@ -82,13 +89,13 @@ class LijstCoordinator(DataUpdateCoordinator):
             # Polling interval. Will only be polled if there are subscribers.
             update_interval=SCAN_INTERVAL,
         )
-        self._token = config_data["token"] #token
+        self._token = config_data["token"]  # token
         self._name = False
         self._hass = hass
-        self._id = self._token.lower()
+        self._id = config_data["lijst_dev_id"]
         self.entry_id = config_entry.entry_id
         self._callbacks = set()
-        #self.firmware_version = f"0.0.{random.randint(1, 9)}"
+        # self.firmware_version = f"0.0.{random.randint(1, 9)}"
         self.model = "Eetlijst"
         self.is_setup = False
         self.last_idx = 0
@@ -146,6 +153,9 @@ class LijstCoordinator(DataUpdateCoordinator):
             ) as resp:
                 respjson = await resp.json()
 
+                if not "data" in respjson:
+                    _LOGGER.error(f"No data key in eetlijst response: {respjson}")
+
                 eetlijst_info = respjson["data"]["eetschema_group"][0]
                 self.lijst_name = eetlijst_info["name"]
                 self._name = "Eetlijst {}".format(eetlijst_info["name"])
@@ -166,7 +176,6 @@ class LijstCoordinator(DataUpdateCoordinator):
                     residents_order[user["user"]["id"]] = person
 
                 self.residents = residents
-                #print(residents_order)
                 self._residents_ordered = residents_order
                 self.model = self.lijst_name
 
@@ -295,10 +304,13 @@ class LijstCoordinator(DataUpdateCoordinator):
                 daystr = "Today"
 
             for person in eet_event["event_attendees_all_users"]:
-                if person["user"]["id"] not in persons_dict:
+                if not person["user"]["id"] in persons_dict:
                     persons_dict[person["user"]["id"]] = person["user"]
                     persons_dict[person["user"]["id"]]["next_week"] = {}
-                persons_dict[person["user"]["id"]]["next_week"][daystr] = {"status": person["status"], "number_guests": person["number_guests"]}
+                persons_dict[person["user"]["id"]]["next_week"][daystr] = {
+                    "status": person["status"],
+                    "number_guests": person["number_guests"],
+                }
         return persons_dict
 
     def query_body_list(self) -> str:

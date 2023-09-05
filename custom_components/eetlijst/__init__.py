@@ -1,12 +1,25 @@
-"""Eetlijst integration."""
+"""Eetlijst integration"""
 from __future__ import annotations
+import logging
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigEntries,
+    SOURCE_REAUTH,
+    ConfigEntryAuthFailed,
+    ConfigEntryError
+)
 from homeassistant.core import HomeAssistant
+from homeassistant import exceptions
+
+from oauthlib.oauth2 import TokenExpiredError
 
 from . import lijst
 from .const import DOMAIN
 
+LOGGER: logging.Logger = logging.getLogger(__package__)
+#LOGGER.setLevel(10)
+_LOGGER = logging.getLogger(__name__)
 # List of platforms to support. There should be a matching .py file for each,
 # eg <cover.py> and <sensor.py>
 PLATFORMS: list[str] = ["sensor"]
@@ -16,11 +29,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Hello World from a config entry."""
     # Store an instance of the "connecting" class that does the work of speaking
     # with your actual devices.
+
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = lijst.LijstCoordinator(
         hass, entry, entry.data
     )
-    entry.async_on_unload(entry.add_update_listener(lijst.options_update_listener))
 
+    entry.async_on_unload(entry.add_update_listener(lijst.options_update_listener))
+    # entry.async_start_reauth()
+
+    # if "lijst_dev_id" not in entry.data:
+    #     print("Setting eetlijst device id")
+    #     await lijst.options_update_listener(hass, entry)
+    # print(f"Eetlijst has entry data {entry.data} and id {entry.entry_id}")
     for pltform in PLATFORMS:
         hass.async_create_task(
             hass.config_entries.async_forward_entry_setup(entry, pltform)
@@ -38,3 +58,25 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate old entry."""
+    _LOGGER.debug("Migrating Eetlijst from config version %s", config_entry.version)
+
+    if config_entry.version == 1:
+        new = {**config_entry.data}
+        if "lijst_dev_id" not in new:
+            new["lijst_dev_id"] = new["token"].lower()
+        # TODO: modify Config Entry data
+
+        config_entry.version = 2
+        hass.config_entries.async_update_entry(config_entry, data=new)
+
+    _LOGGER.info("Migration to version %s successful", config_entry.version)
+
+    return True
+
+
+class InvalidToken(exceptions.HomeAssistantError):
+    """Error to indicate there is an invalid hostname."""

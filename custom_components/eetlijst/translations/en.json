@@ -30,12 +30,12 @@
     "options": {
         "error": {
             "cannot_connect": "Failed to connect",
-            "invalid_auth": "Invalid authentication",
+            "invalid_auth": "Invalid authentication, token may be expired",
             "unknown": "Unexpected error",
             "invalid_token": "Invalid JWT Token"
         },
         "step": {
-            "init": {
+            "option_step": {
                 "data": {
                     "show_balance": "Show User Balance",
                     "custom_pictures": "Custom Entity Pictures",
@@ -45,6 +45,13 @@
                 },
                 "data_description": {
                     "update_jwt_token": "If old one expired; leave blank to not update"
+                }
+            },
+            "setjwt": {
+                "title": "Eetlijst JWT Token expired",
+                "description": "A new token can be found when inspecting your browser local storage on www.eetlijst.nl",
+                "data": {
+                    "update_jwt_token": "New JWT Token"
                 }
             }
         }

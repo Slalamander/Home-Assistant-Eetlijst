@@ -6,14 +6,12 @@ from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries, exceptions, data_entry_flow
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import config_entry_oauth2_flow
 from .const import DOMAIN  # pylint:disable=unused-import
 from .lijst import test_token
 
+
 _LOGGER = logging.getLogger(__name__)
-# _LOGGER.setLevel(10)
-_LOGGER.debug(
-    f"Eetlijst logging at level {_LOGGER.getEffectiveLevel()} under name {_LOGGER.name}"
-)
 
 DATA_SCHEMA = vol.Schema(
     {
@@ -60,7 +58,7 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Hello World."""
 
-    VERSION = 1
+    VERSION = 2
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     async def async_step_user(self, user_input=None):
@@ -72,9 +70,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await validate_input(self.hass, user_input)
                 for input_key in user_input:
                     self.data[input_key] = user_input[input_key]
-                self.data["title"] = info["title"]
 
-                self.async_create_entry(title=info["title"], data=user_input)
+                self.data["title"] = info["title"]
+                self.data["lijst_dev_id"] = user_input["token"]
+                await self.async_set_unique_id(user_input["token"])
+                # self._abort_if_unique_id_configured()
+                # self.async_create_entry(title=info["title"], data= self.data)
                 return await self.async_step_options(title=info["title"])
 
             except CannotConnect:
@@ -136,25 +137,50 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Required(
                     "use_external_url", default=opt_set["use_external_url"]
                 ): bool,
-                vol.Optional("update_jwt_token"): str,
             }
         )
+
+        self.update_token_schema = vol.Schema({vol.Required("update_jwt_token"): str})
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> data_entry_flow.FlowResult:
         """Manage the options."""
-        errors = {}
+        self.new_data = {}
+        try:
+            (result, info) = await test_token(self.config_entry.data["token"])
+            if not result:
+                if info is not None:
+                    if (
+                        info["errors"][0]["extensions"]["code"] == "invalid-jwt"
+                        or info["errors"][0]["extensions"]["code"] == "invalid-headers"
+                    ):
+                        raise InvalidToken
+            _LOGGER.debug("Going to options step")
+            return await self.async_step_option_step()
 
+            # self.async_show_form(
+            #     step_id="option_step", data_schema=self.options_schema, errors=errors
+            # )
+        except InvalidToken:
+            print("Going to reauth")
+            return await self.async_step_setjwt()
+            # return self.async_show_form(
+            #     step_id="init", data_schema=self.update_token_schema, errors=errors
+            # )
+
+    async def async_step_setjwt(self, user_input=None) -> data_entry_flow.FlowResult:
+        """Show the reauth form"""
+        errors = {}
         if user_input is not None:
             try:
-                if "update_jwt_token" in user_input:
-                    _LOGGER.debug("Got new Eetlijst JWT token")
-                    validate_dict = {}
-                    validate_dict["token"] = user_input["update_jwt_token"]
-                    info = await validate_input(self.hass, validate_dict)
-                    # (result, info) = await test_token(user_input["update_jwt_token"])
-                return self.async_create_entry(title="", data=user_input)
+                _LOGGER.debug("Got new Eetlijst JWT token")
+
+                await validate_input(
+                    self.hass, {"token": user_input["update_jwt_token"]}
+                )
+                self.new_data["token"] = user_input["update_jwt_token"]
+                return await self.async_step_option_step()
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except InvalidHost:
@@ -166,7 +192,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 errors["base"] = "unknown"
 
         return self.async_show_form(
-            step_id="init", data_schema=self.options_schema, errors=errors
+            step_id="setjwt", data_schema=self.update_token_schema, errors=errors
+        )
+
+    async def async_step_option_step(
+        self, user_input=None
+    ) -> data_entry_flow.FlowResult:
+        """Show the options form"""
+        errors = {}
+        _LOGGER.debug("Showing options menu for eetlijst")
+        if user_input is not None:
+            self.new_data.update(user_input)
+            return self.async_create_entry(title="", data=self.new_data)
+
+        return self.async_show_form(
+            step_id="option_step", data_schema=self.options_schema, errors=errors
         )
 
 
