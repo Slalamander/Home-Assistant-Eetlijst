@@ -21,8 +21,13 @@ After restarting your instance, go to integrations and search for Eetlijst. It w
 
 If you go to your account on the website, you will see a button with `developer API key`. If you click this, the API key (same as the JWT token) will apear on your screen. Copy it and paste it in the token field.
 
-***
-(Instruction below are deprecated and complicated)
+
+ <br>
+ If the API key button does not appear on your account page, try the instructions below:
+<details>
+  <summary>Getting the JWT Token from your browser's local storage </summary>
+  
+(These Instructions are complicated and should only be required if you can't get the API key from your eetlijst account page)
 
 You can get this token from your local storage as follows:
 <img src="https://github.com/Slalamander/Home-Assistant-Eetlijst/blob/main/images/eetlijst-token.png">
@@ -34,8 +39,9 @@ You can get this token from your local storage as follows:
 5. In the rightmost tab, go to the `persist:root` object, right click, and select copy
 
 After pasting the contents somewhere like a text file, copy the contents of the `"token":` key (without the opening apostrophes), and paste them in the token field.
-***
+</details>
 
+***
 Next you can select a few options:
 1. Show User Balance: Whether the monetary balance from eetlijst for a person should be shown
 2. Custom Entity Pictures: Instead of using an icon for the entities, the today sensor and resident sensors will use the custom images in `www/eetlijst_custom_pictures` in the frontend. (You have to add these manually to your `www` folder in home assistant) These change dynamically depending on a person's state for the day, however I made these for an older version for the old eetlijst website, so they may not be to your liking anymore (though, as shown later, they may also have their uses).
