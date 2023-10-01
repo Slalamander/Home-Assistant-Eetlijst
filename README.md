@@ -17,7 +17,14 @@ Or copy the contents from `custom_components` directory to your home assistant `
 
 ### Setup
 
-After restarting your instance, go to integrations and search for Eetlijst. It will first ask for your JWT token. You can get this from your local storage as follows:
+After restarting your instance, go to integrations and search for Eetlijst. It will first ask for your JWT token. 
+
+If you go to your account on the website, you will see a button with `developer API key`. If you click this, the API key (same as the JWT token) will apear on your screen. Copy it and paste it in the token field.
+
+***
+(Instruction below are deprecated and complicated)
+
+You can get this token from your local storage as follows:
 <img src="https://github.com/Slalamander/Home-Assistant-Eetlijst/blob/main/images/eetlijst-token.png">
 
 1. On the eetlijst website in your browser, open the inspector (usually, right click --> inspect) and go to the storage tab
@@ -27,6 +34,7 @@ After restarting your instance, go to integrations and search for Eetlijst. It w
 5. In the rightmost tab, go to the `persist:root` object, right click, and select copy
 
 After pasting the contents somewhere like a text file, copy the contents of the `"token":` key (without the opening apostrophes), and paste them in the token field.
+***
 
 Next you can select a few options:
 1. Show User Balance: Whether the monetary balance from eetlijst for a person should be shown
