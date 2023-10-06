@@ -15,6 +15,13 @@
           "resident_units": "[%key:common::config_flow::data::resident_units%]",
           "use_external_url": "[%key:common::config_flow::data::use_external_url%]"
         }
+      },
+      "reauth_confirm": {
+        "title": "Eetlijst JWT Token",
+        "description": "The token can be found when inspecting your browser local storage on www.eetlijst.nl",
+        "data": {
+          "token": "[%key:common::config_flow::data::token%]"
+        }
       }
     },
     "error": {
@@ -25,7 +32,8 @@
       "token_expired": "[%key:common::config_flow::error::token_expired%]"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
     }
   },
   "options": {
@@ -41,7 +49,9 @@
       "setjwt": {
         "title": "Eetlijst JWT Token expired",
         "description": "A new token can be found when inspecting your browser local storage on www.eetlijst.nl",
-        "data": {"update_jwt_token": "[%key:common::options_flow::data::update_jwt_token%]"}
+        "data": {
+          "update_jwt_token": "[%key:common::options_flow::data::update_jwt_token%]"
+        }
       }
     }
   },

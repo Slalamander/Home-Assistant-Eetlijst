@@ -1,7 +1,8 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Device is already configured"
+            "already_configured": "Device is already configured",
+            "reauth_successful": "Succesfully Updated JWT Token"
         },
         "error": {
             "cannot_connect": "Failed to connect",
@@ -23,6 +24,13 @@
                     "custom_pictures": "Custom Entity Pictures",
                     "resident_units": "Resident names as unit of measurement",
                     "use_external_url": "Use External URL for entity pictures"
+                }
+            },
+            "reauth_confirm": {
+                "title": "Eetlijst JWT Token",
+                "description": "The token can be found when inspecting your browser local storage on www.eetlijst.nl",
+                "data": {
+                    "token": "Eetlijst JWT Token"
                 }
             }
         }
