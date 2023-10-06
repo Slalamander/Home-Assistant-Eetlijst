@@ -40,7 +40,7 @@ async def options_update_listener(hass: HomeAssistant, entry):
 
 async def test_token(token) -> bool:
     """Test connectivity to the API is OK."""
-    print("Testing Eetlijst connection")
+    _LOGGER.debug("Testing Eetlijst connection")
     Headers = {}
     Headers["content-type"] = "application/json"
     Headers["Authorization"] = f"Bearer {token}"
@@ -65,9 +65,13 @@ async def test_token(token) -> bool:
                     _LOGGER.error(f"Got an error in connecting to the API {respjson}")
                     return (False, respjson)
                 else:
-                    eetlijst_info = respjson["data"]["eetschema_group"][0]
-                    lijst_name = eetlijst_info["name"]
-                    return (True, lijst_name)
+                    try:
+                        eetlijst_info = respjson["data"]["eetschema_group"][0]
+                        lijst_name = eetlijst_info["name"]
+                        return (True, lijst_name)
+                    except Exception as exce:
+                        respjson["errors"] = exce
+                        return (False, respjson)
             else:
                 return (False, None)
 
@@ -156,6 +160,7 @@ class LijstCoordinator(DataUpdateCoordinator):
                 if not "data" in respjson:
                     _LOGGER.error(f"No data key in eetlijst response: {respjson}")
 
+                _LOGGER.warning(f"Eetlijst got response {respjson}")
                 eetlijst_info = respjson["data"]["eetschema_group"][0]
                 self.lijst_name = eetlijst_info["name"]
                 self._name = "Eetlijst {}".format(eetlijst_info["name"])
