@@ -7,18 +7,16 @@ from homeassistant.config_entries import (
     ConfigEntries,
     SOURCE_REAUTH,
     ConfigEntryAuthFailed,
-    ConfigEntryError
+    ConfigEntryError,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant import exceptions
-
-from oauthlib.oauth2 import TokenExpiredError
 
 from . import lijst
 from .const import DOMAIN
 
 LOGGER: logging.Logger = logging.getLogger(__package__)
-#LOGGER.setLevel(10)
+LOGGER.setLevel(10)
 _LOGGER = logging.getLogger(__name__)
 # List of platforms to support. There should be a matching .py file for each,
 # eg <cover.py> and <sensor.py>
@@ -26,15 +24,20 @@ PLATFORMS: list[str] = ["sensor"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Hello World from a config entry."""
-    # Store an instance of the "connecting" class that does the work of speaking
-    # with your actual devices.
+    """Set up Eetlijst from a config entry."""
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = lijst.LijstCoordinator(
         hass, entry, entry.data
     )
 
     entry.async_on_unload(entry.add_update_listener(lijst.options_update_listener))
+
+    (valid, resp) = await lijst.test_token(entry.data["token"])
+    if not valid:
+        LOGGER.error(
+            f"Error validating eetlijst connection. Got response {resp}. Try updating the JWT token."
+        )
+        raise ConfigEntryAuthFailed(f"Credentials expired for {entry.data['title']}")
     # entry.async_start_reauth()
 
     # if "lijst_dev_id" not in entry.data:
@@ -79,4 +82,8 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
 
 
 class InvalidToken(exceptions.HomeAssistantError):
+    """Error to indicate there is an invalid hostname."""
+
+
+class SetupError(exceptions.ConfigEntryError):
     """Error to indicate there is an invalid hostname."""
