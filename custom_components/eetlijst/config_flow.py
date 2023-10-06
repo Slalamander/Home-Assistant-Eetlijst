@@ -6,7 +6,6 @@ from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries, exceptions, data_entry_flow
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import config_entry_oauth2_flow
 from .const import DOMAIN  # pylint:disable=unused-import
 from .lijst import test_token
 
@@ -60,6 +59,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 2
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+    reauth_entry: config_entries.ConfigEntry | None = None
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
@@ -107,6 +107,41 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="options", data_schema=OPTIONS_SCHEMA, errors=errors
         )
 
+    async def async_step_reauth(self, user_input=None):
+        """Perform reauth upon an API authentication error."""
+        self.reauth_entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"]
+        )
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(self, user_input=None):
+        """Dialog that informs the user that reauth is required."""
+        errors = {}
+        if user_input is not None:
+            try:
+                info = await validate_input(self.hass, user_input)
+                data = dict(self.reauth_entry.data)
+                data["token"] = user_input["token"]
+                self.hass.config_entries.async_update_entry(
+                    self.reauth_entry, data=data
+                )
+                await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                return self.async_abort(reason="reauth_successful")
+
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except InvalidHost:
+                errors["base"] = "cannot_connect"
+            except InvalidToken:
+                errors["base"] = "invalid_token"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="reauth_confirm", data_schema=DATA_SCHEMA, errors=errors
+        )
+
     @staticmethod
     @callback
     def async_get_options_flow(
@@ -150,12 +185,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         try:
             (result, info) = await test_token(self.config_entry.data["token"])
             if not result:
-                if info is not None:
-                    if (
-                        info["errors"][0]["extensions"]["code"] == "invalid-jwt"
-                        or info["errors"][0]["extensions"]["code"] == "invalid-headers"
-                    ):
-                        raise InvalidToken
+                if "errors" in info:
+                    try:
+                        if (
+                            info["errors"][0]["extensions"]["code"] == "invalid-jwt"
+                            or info["errors"][0]["extensions"]["code"]
+                            == "invalid-headers"
+                        ):
+                            raise InvalidToken
+                    except:
+                        raise ResponseError
+                else:
+                    raise ResponseError
+
             _LOGGER.debug("Going to options step")
             return await self.async_step_option_step()
 
@@ -163,7 +205,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             #     step_id="option_step", data_schema=self.options_schema, errors=errors
             # )
         except InvalidToken:
-            print("Going to reauth")
+            return await self.async_step_setjwt()
+        except ResponseError:
             return await self.async_step_setjwt()
             # return self.async_show_form(
             #     step_id="init", data_schema=self.update_token_schema, errors=errors
@@ -219,4 +262,8 @@ class InvalidHost(exceptions.HomeAssistantError):
 
 
 class InvalidToken(exceptions.HomeAssistantError):
-    """Error to indicate there is an invalid hostname."""
+    """Error to indicate there is an invalid Token."""
+
+
+class ResponseError(exceptions.HomeAssistantError):
+    """Error to indicate that something went wrong in the token response."""
