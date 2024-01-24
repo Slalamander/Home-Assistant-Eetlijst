@@ -321,7 +321,7 @@ class LijstCoordinator(DataUpdateCoordinator):
     def query_body_list(self) -> str:
         return """
             query MyQuery {
-            eetschema_list(where: {checked: {_eq: false}}) {
+            eetschema_list(where: {checked: {_eq: false}, active: {_eq: true}}) {
                 text
                 checked
             }
