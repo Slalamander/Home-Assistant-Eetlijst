@@ -160,7 +160,7 @@ class LijstCoordinator(DataUpdateCoordinator):
                 if not "data" in respjson:
                     _LOGGER.error(f"No data key in eetlijst response: {respjson}")
 
-                _LOGGER.warning(f"Eetlijst got response {respjson}")
+                _LOGGER.info(f"Eetlijst got response {respjson}")
                 eetlijst_info = respjson["data"]["eetschema_group"][0]
                 self.lijst_name = eetlijst_info["name"]
                 self._name = "Eetlijst {}".format(eetlijst_info["name"])
