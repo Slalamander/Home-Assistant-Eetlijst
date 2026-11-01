@@ -58,7 +58,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Hello World."""
 
     VERSION = 2
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
     reauth_entry: config_entries.ConfigEntry | None = None
 
     async def async_step_user(self, user_input=None):
